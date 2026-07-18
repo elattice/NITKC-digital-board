@@ -1,5 +1,17 @@
+# macOS
 .DS_Store
 
 # AI assistant instructions (local only)
 CLAUDE.md
 AGENTS.md
+
+# Dependencies and frontend development build
+/frontend/node_modules/
+/frontend/dist/
+
+# Local SQLite database
+/data/*.db
+
+# Generated executables
+/dist/digital-board*
+/backend/server

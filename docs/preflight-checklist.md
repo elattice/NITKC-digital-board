@@ -18,7 +18,7 @@ sha256sum /path/to/timetable.csv /path/to/backup/timetable.csv
 
 期待結果: 2ファイルのハッシュ値が一致する。
 
-- [ ] CSVのヘッダー、全便、時刻、行き先、のりば、備考を担当者2名で確認した
+- [ ] CSVのヘッダー、全便、路線名、行き先、発車時刻、バスののりばを担当者2名で確認した
 - [ ] 検証用の作業ディレクトリを作成した
 
 ```bash
@@ -130,8 +130,8 @@ curl -fsS http://localhost:8080/api/departures > "$PREFLIGHT_DIR/before-invalid.
 ヘッダーまたはデータ行を意図的に不正にした検証用CSVを用意します。例として、`kind` を許可されていない値にしたCSVを作成します。
 
 ```csv
-kind,route_name,origin,destination,departure_time,arrival_time,platform,note
-airplane,不正データ,高専前,大楽毛駅,10:15,10:35,高専前,
+kind,route_name,destination,departure_time,platform
+airplane,不正データ,大楽毛駅,10:15,
 ```
 
 不正CSVを `/admin` からアップロードするか、APIへ送信します。

@@ -4,12 +4,9 @@ type Departure struct {
 	ID            int    `json:"id"`
 	Kind          string `json:"kind"`
 	RouteName     string `json:"routeName"`
-	Origin        string `json:"origin"`
 	Destination   string `json:"destination"`
 	DepartureTime string `json:"departureTime"`
-	ArrivalTime   string `json:"arrivalTime,omitempty"`
-	Platform      string `json:"platform,omitempty"`
-	Note          string `json:"note,omitempty"`
+	Platform      string `json:"platform"`
 }
 
 type DeparturesResponse struct {

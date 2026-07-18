@@ -12,20 +12,29 @@ import (
 const schema = `
 CREATE TABLE IF NOT EXISTS departures (
   id INTEGER PRIMARY KEY AUTOINCREMENT,
-  kind TEXT NOT NULL,
-  route_name TEXT NOT NULL,
-  origin TEXT NOT NULL,
-  destination TEXT NOT NULL,
-  departure_time TEXT NOT NULL,
-  arrival_time TEXT,
-  platform TEXT,
-  note TEXT,
+  kind TEXT NOT NULL CHECK (kind IN ('bus', 'train')),
+  route_name TEXT NOT NULL CHECK (route_name <> ''),
+  destination TEXT NOT NULL CHECK (destination <> ''),
+  departure_time TEXT NOT NULL CHECK (departure_time <> ''),
+  platform TEXT NOT NULL DEFAULT '',
   active INTEGER NOT NULL DEFAULT 1
 );
 `
 
-// Open opens the SQLite database at path, creating the parent directory,
-// the schema, and initial sample data as needed.
+const migratedSchema = `
+CREATE TABLE departures_new (
+  id INTEGER PRIMARY KEY AUTOINCREMENT,
+  kind TEXT NOT NULL CHECK (kind IN ('bus', 'train')),
+  route_name TEXT NOT NULL CHECK (route_name <> ''),
+  destination TEXT NOT NULL CHECK (destination <> ''),
+  departure_time TEXT NOT NULL CHECK (departure_time <> ''),
+  platform TEXT NOT NULL DEFAULT '',
+  active INTEGER NOT NULL DEFAULT 1
+);
+`
+
+// Open opens the SQLite database at path, creating the parent directory and
+// schema as needed. Timetable data is only populated through CSV import.
 func Open(path string) (*sql.DB, error) {
 	if err := os.MkdirAll(filepath.Dir(path), 0o755); err != nil {
 		return nil, fmt.Errorf("create db directory: %w", err)
@@ -45,34 +54,68 @@ func Open(path string) (*sql.DB, error) {
 		return nil, fmt.Errorf("ping database: %w", err)
 	}
 
-	if _, err := conn.Exec(schema); err != nil {
+	if err := migrateSchema(conn); err != nil {
 		conn.Close()
-		return nil, fmt.Errorf("create schema: %w", err)
-	}
-
-	if err := seedIfEmpty(conn); err != nil {
-		conn.Close()
-		return nil, fmt.Errorf("seed database: %w", err)
+		return nil, fmt.Errorf("migrate schema: %w", err)
 	}
 
 	return conn, nil
 }
 
-func seedIfEmpty(conn *sql.DB) error {
-	var count int
-	if err := conn.QueryRow(`SELECT COUNT(*) FROM departures`).Scan(&count); err != nil {
+func migrateSchema(conn *sql.DB) error {
+	rows, err := conn.Query(`PRAGMA table_info(departures)`)
+	if err != nil {
 		return err
 	}
-	if count > 0 {
+
+	columns := map[string]bool{}
+	for rows.Next() {
+		var cid, notNull, primaryKey int
+		var name, columnType string
+		var defaultValue any
+		if err := rows.Scan(&cid, &name, &columnType, &notNull, &defaultValue, &primaryKey); err != nil {
+			rows.Close()
+			return err
+		}
+		columns[name] = true
+	}
+	if err := rows.Err(); err != nil {
+		rows.Close()
+		return err
+	}
+	if err := rows.Close(); err != nil {
+		return err
+	}
+
+	if len(columns) == 0 {
+		_, err := conn.Exec(schema)
+		return err
+	}
+	if !columns["origin"] && !columns["arrival_time"] && !columns["note"] {
 		return nil
 	}
 
-	_, err := conn.Exec(`
-		INSERT INTO departures (kind, route_name, origin, destination, departure_time, arrival_time, platform, note)
-		VALUES
-			('bus',   '高専前→大楽毛駅',   '高専前',   '大楽毛駅', '10:15', '10:35', '高専前', ''),
-			('train', '大楽毛駅→釧路方面', '大楽毛駅', '釧路方面', '10:22', '10:41', '1番線',  '普通'),
-			('train', '大楽毛駅→帯広方面', '大楽毛駅', '帯広方面', '10:41', '11:03', '2番線',  '普通')
-	`)
-	return err
+	tx, err := conn.Begin()
+	if err != nil {
+		return err
+	}
+	defer tx.Rollback()
+
+	if _, err := tx.Exec(migratedSchema); err != nil {
+		return err
+	}
+	if _, err := tx.Exec(`
+		INSERT INTO departures_new (id, kind, route_name, destination, departure_time, platform, active)
+		SELECT id, kind, route_name, destination, departure_time, COALESCE(platform, ''), active
+		FROM departures
+	`); err != nil {
+		return err
+	}
+	if _, err := tx.Exec(`DROP TABLE departures`); err != nil {
+		return err
+	}
+	if _, err := tx.Exec(`ALTER TABLE departures_new RENAME TO departures`); err != nil {
+		return err
+	}
+	return tx.Commit()
 }

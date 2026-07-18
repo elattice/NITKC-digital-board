@@ -20,7 +20,7 @@ func NewService(db *sql.DB) *Service {
 func (s *Service) UpcomingDepartures() (UpcomingDeparturesResponse, error) {
 	now := time.Now().Format("15:04")
 	departures, err := s.queryDepartures(`
-		SELECT id, kind, route_name, origin, destination, departure_time, arrival_time, platform, note
+		SELECT id, kind, route_name, destination, departure_time, platform
 		FROM departures
 		WHERE active = 1 AND departure_time >= ?
 		ORDER BY departure_time, id
@@ -48,7 +48,7 @@ func (s *Service) UpcomingDepartures() (UpcomingDeparturesResponse, error) {
 // AllDepartures returns every departure, including inactive ones.
 func (s *Service) AllDepartures() ([]Departure, error) {
 	return s.queryDepartures(`
-		SELECT id, kind, route_name, origin, destination, departure_time, arrival_time, platform, note
+		SELECT id, kind, route_name, destination, departure_time, platform
 		FROM departures
 		ORDER BY departure_time, id
 	`)
@@ -72,8 +72,8 @@ func (s *Service) ReplaceDepartures(departures []Departure) (int, error) {
 	}
 
 	stmt, err := tx.Prepare(`
-		INSERT INTO departures (kind, route_name, origin, destination, departure_time, arrival_time, platform, note)
-		VALUES (?, ?, ?, ?, ?, ?, ?, ?)
+		INSERT INTO departures (kind, route_name, destination, departure_time, platform)
+		VALUES (?, ?, ?, ?, ?)
 	`)
 	if err != nil {
 		return 0, err
@@ -81,7 +81,7 @@ func (s *Service) ReplaceDepartures(departures []Departure) (int, error) {
 	defer stmt.Close()
 
 	for _, d := range departures {
-		if _, err := stmt.Exec(d.Kind, d.RouteName, d.Origin, d.Destination, d.DepartureTime, d.ArrivalTime, d.Platform, d.Note); err != nil {
+		if _, err := stmt.Exec(d.Kind, d.RouteName, d.Destination, d.DepartureTime, d.Platform); err != nil {
 			return 0, err
 		}
 	}
@@ -102,13 +102,9 @@ func (s *Service) queryDepartures(query string, args ...any) ([]Departure, error
 	departures := []Departure{}
 	for rows.Next() {
 		var d Departure
-		var arrivalTime, platform, note sql.NullString
-		if err := rows.Scan(&d.ID, &d.Kind, &d.RouteName, &d.Origin, &d.Destination, &d.DepartureTime, &arrivalTime, &platform, &note); err != nil {
+		if err := rows.Scan(&d.ID, &d.Kind, &d.RouteName, &d.Destination, &d.DepartureTime, &d.Platform); err != nil {
 			return nil, err
 		}
-		d.ArrivalTime = arrivalTime.String
-		d.Platform = platform.String
-		d.Note = note.String
 		departures = append(departures, d)
 	}
 	return departures, rows.Err()

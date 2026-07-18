@@ -4,12 +4,9 @@ export interface Departure {
   id: number;
   kind: DepartureKind;
   routeName: string;
-  origin: string;
   destination: string;
   departureTime: string;
-  arrivalTime?: string;
-  platform?: string;
-  note?: string;
+  platform: string;
 }
 
 export interface UpcomingDeparturesResponse {

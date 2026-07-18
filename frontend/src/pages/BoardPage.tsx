@@ -1,25 +1,11 @@
 import { useEffect, useState } from "react";
 import { fetchUpcomingDepartures } from "../api/timetable";
-import type { Departure, UpcomingDeparturesResponse } from "../types/timetable";
+import type { UpcomingDeparturesResponse } from "../types/timetable";
 import Clock, { DateDisplay } from "../components/Clock";
 import DepartureBoard from "../components/DepartureBoard";
 import NoticeTicker from "../components/NoticeTicker";
 
 const REFRESH_INTERVAL_MS = 30_000;
-
-// 電車はすべて大楽毛駅発として表示する
-const TRAIN_STATION = "大楽毛駅";
-
-function trainsFor(
-  data: UpcomingDeparturesResponse | null,
-  keywords: string[],
-): Departure[] {
-  return (data?.train ?? [])
-    .filter((departure) =>
-      keywords.some((keyword) => departure.destination.includes(keyword)),
-    )
-    .map((departure) => ({ ...departure, origin: TRAIN_STATION }));
-}
 
 export default function BoardPage() {
   const [data, setData] = useState<UpcomingDeparturesResponse | null>(null);
@@ -53,8 +39,8 @@ export default function BoardPage() {
   }, []);
 
   return (
-    <div className="flex min-h-screen flex-col bg-slate-900 text-white">
-      <header className="flex items-center justify-between gap-6 bg-[#33507c] px-6 py-3">
+    <div className="flex h-screen flex-col overflow-hidden bg-slate-900 text-white">
+      <header className="flex shrink-0 items-center justify-between gap-6 bg-[#33507c] px-6 py-3">
         <div className="flex items-center gap-4">
           <span className="flex h-12 w-12 shrink-0 items-center justify-center rounded-lg bg-white lg:h-14 lg:w-14">
             <svg
@@ -73,7 +59,7 @@ export default function BoardPage() {
         </div>
       </header>
 
-      <main className="flex flex-1 flex-col">
+      <main className="grid min-h-0 flex-1 grid-rows-2 overflow-hidden">
         <DepartureBoard
           title="バス"
           departures={data?.bus ?? []}
@@ -81,20 +67,14 @@ export default function BoardPage() {
           variant="bus"
         />
         <DepartureBoard
-          title={`JR根室本線（${TRAIN_STATION}） 新得・音別方面`}
-          departures={trainsFor(data, ["新得", "音別", "帯広"])}
+          title="電車"
+          departures={data?.train ?? []}
           accent="orange"
-          variant="train"
-        />
-        <DepartureBoard
-          title={`JR根室本線（${TRAIN_STATION}） 釧路方面`}
-          departures={trainsFor(data, ["釧路"])}
-          accent="purple"
           variant="train"
         />
       </main>
 
-      <footer className="flex items-center bg-slate-700 px-6 py-3">
+      <footer className="flex shrink-0 items-center bg-slate-700 px-6 py-2">
         <NoticeTicker message={errorMessage} />
       </footer>
     </div>

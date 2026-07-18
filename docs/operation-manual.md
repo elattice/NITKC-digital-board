@@ -7,6 +7,7 @@
 - [ ] 表示用Ubuntu PCとモニターの動作確認(HDMI接続・電源)
 - [ ] フロントエンドをビルド後、Goバイナリを作成済みであることを確認(`cd frontend && npm run build`、続いて `cd ../backend && go build ./cmd/server`)
 - [ ] 当日の時刻表CSVを用意する(形式は [README.md の「CSV形式」](../README.md#csv形式) を参照)
+- [ ] CSVの必須項目を確認する(`route_name`、`destination`、`departure_time`、およびバスの`platform`。電車の`platform`は空欄可)
 - [ ] CSVを一度インポートして、掲示板画面に正しく表示されることを確認する
 - [ ] Ubuntuの「設定 → 電源」で画面のブランク(スリープ)を「しない」にする
 - [ ] OSの自動アップデート再起動が当日に走らないか確認する
@@ -43,6 +44,7 @@ chromium-browser --kiosk --noerrdialogs --disable-session-crashed-bubble --incog
 3. 成功メッセージと一覧を確認する
 
 - インポートは**全件置き換え**。CSVには当日の全便を入れておくこと
+- CSVの列は `kind,route_name,destination,departure_time,platform` の順序で固定
 - エラーが出た場合はDBは変更されない。「◯行目: ...」の内容に従ってCSVを直して再アップロードする
 - 掲示板は30秒ごとに自動更新されるので、キオスク画面の操作は不要
 

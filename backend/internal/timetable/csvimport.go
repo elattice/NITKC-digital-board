@@ -8,7 +8,7 @@ import (
 	"strings"
 )
 
-var csvHeader = []string{"kind", "route_name", "origin", "destination", "departure_time", "arrival_time", "platform", "note"}
+var csvHeader = []string{"kind", "route_name", "destination", "departure_time", "platform"}
 
 // Zero-padded HH:MM only: upcoming-departure filtering compares these
 // values as strings, so "9:15" must be rejected in favor of "09:15".
@@ -72,12 +72,9 @@ func parseRow(record []string) (Departure, []string) {
 	d := Departure{
 		Kind:          record[0],
 		RouteName:     record[1],
-		Origin:        record[2],
-		Destination:   record[3],
-		DepartureTime: record[4],
-		ArrivalTime:   record[5],
-		Platform:      record[6],
-		Note:          record[7],
+		Destination:   record[2],
+		DepartureTime: record[3],
+		Platform:      record[4],
 	}
 
 	var errs []string
@@ -87,17 +84,14 @@ func parseRow(record []string) (Departure, []string) {
 	if d.RouteName == "" {
 		errs = append(errs, "route_name が空です")
 	}
-	if d.Origin == "" {
-		errs = append(errs, "origin が空です")
-	}
 	if d.Destination == "" {
 		errs = append(errs, "destination が空です")
 	}
 	if !timePattern.MatchString(d.DepartureTime) {
 		errs = append(errs, fmt.Sprintf("departure_time は HH:MM 形式で指定してください: %q", d.DepartureTime))
 	}
-	if d.ArrivalTime != "" && !timePattern.MatchString(d.ArrivalTime) {
-		errs = append(errs, fmt.Sprintf("arrival_time は HH:MM 形式で指定してください: %q", d.ArrivalTime))
+	if d.Kind == "bus" && d.Platform == "" {
+		errs = append(errs, "bus の platform が空です")
 	}
 	return d, errs
 }

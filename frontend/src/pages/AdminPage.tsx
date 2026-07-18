@@ -126,12 +126,9 @@ export default function AdminPage() {
                   <tr className="border-b border-slate-300 text-left text-slate-600">
                     <th className="px-3 py-2">種別</th>
                     <th className="px-3 py-2">路線名</th>
-                    <th className="px-3 py-2">出発地</th>
                     <th className="px-3 py-2">行き先</th>
                     <th className="px-3 py-2">発車</th>
-                    <th className="px-3 py-2">到着</th>
                     <th className="px-3 py-2">のりば</th>
-                    <th className="px-3 py-2">備考</th>
                   </tr>
                 </thead>
                 <tbody>
@@ -144,16 +141,11 @@ export default function AdminPage() {
                         {KIND_LABELS[departure.kind] ?? departure.kind}
                       </td>
                       <td className="px-3 py-2">{departure.routeName}</td>
-                      <td className="px-3 py-2">{departure.origin}</td>
                       <td className="px-3 py-2">{departure.destination}</td>
                       <td className="px-3 py-2 tabular-nums">
                         {departure.departureTime}
                       </td>
-                      <td className="px-3 py-2 tabular-nums">
-                        {departure.arrivalTime ?? ""}
-                      </td>
-                      <td className="px-3 py-2">{departure.platform ?? ""}</td>
-                      <td className="px-3 py-2">{departure.note ?? ""}</td>
+                      <td className="px-3 py-2">{departure.platform}</td>
                     </tr>
                   ))}
                 </tbody>
