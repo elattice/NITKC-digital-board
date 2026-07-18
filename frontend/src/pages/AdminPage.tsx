@@ -128,7 +128,7 @@ export default function AdminPage() {
                     <th className="px-3 py-2">路線名</th>
                     <th className="px-3 py-2">行き先</th>
                     <th className="px-3 py-2">発車</th>
-                    <th className="px-3 py-2">のりば</th>
+                    <th className="px-3 py-2">のりば・駅名</th>
                   </tr>
                 </thead>
                 <tbody>

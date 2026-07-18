@@ -9,5 +9,6 @@ export const accentBars = {
 
 export const rowGridClasses = {
   bus: "grid grid-cols-[minmax(0,3fr)_minmax(0,2fr)_1.3fr_1fr] items-center gap-4 px-8",
-  train: "grid grid-cols-[minmax(0,3fr)_minmax(0,2fr)_1.3fr] items-center gap-4 px-8",
+  train:
+    "grid grid-cols-[minmax(0,3fr)_minmax(0,2fr)_1.3fr_1fr] items-center gap-4 px-8",
 } as const;

@@ -30,11 +30,9 @@ export default function DepartureCard({
         {departure.departureTime}
       </div>
 
-      {variant === "bus" && (
-        <div className="text-center text-2xl text-white lg:text-3xl">
-          {departure.platform}
-        </div>
-      )}
+      <div className="text-center text-2xl text-white lg:text-3xl">
+        {departure.platform}
+      </div>
     </div>
   );
 }

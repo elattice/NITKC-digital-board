@@ -58,7 +58,7 @@ Add one departure per row. For example:
 ```csv
 kind,route_name,destination,departure_time,platform
 bus,大楽毛線,釧路駅,07:40,高専前
-train,根室本線,釧路方面,07:27,
+train,根室本線,釧路方面,07:27,大楽毛駅
 ```
 
 | Column | Required | Description |
@@ -67,7 +67,7 @@ train,根室本線,釧路方面,07:27,
 | `route_name` | Yes | Route or line name shown on the display board. |
 | `destination` | Yes | Destination shown on the display board. |
 | `departure_time` | Yes | Departure time in zero-padded 24-hour `HH:MM` format, such as `07:40` or `15:25`. |
-| `platform` | For buses | Bus stop or boarding location. This may be left empty for trains, but the final comma must remain. |
+| `platform` | Yes | Bus stop or boarding location for buses; departure station name for trains. |
 
 Important notes:
 

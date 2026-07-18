@@ -60,7 +60,11 @@ export default function DepartureBoard({
             <HeaderLabel ja="路線名" en="Route" />
             <HeaderLabel ja="行先" en="Destination" />
             <HeaderLabel ja="発車時刻" en="Dep. Time" />
-            {variant === "bus" && <HeaderLabel ja="のりば" en="Platform" />}
+            {variant === "bus" ? (
+              <HeaderLabel ja="のりば" en="Platform" />
+            ) : (
+              <HeaderLabel ja="駅名" en="Station" />
+            )}
           </div>
 
           <div
